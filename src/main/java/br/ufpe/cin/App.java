@@ -58,12 +58,19 @@ public class App
 
   public static void main(String[] args) throws IOException {
     final String javaCode = Files
-        .readString(Paths.get("//home//jpedroh//Projetos//cin//OSean.EX//src//main//java//org//RunSerialization.java"));
+        .readString(Paths.get(
+            "//home//jpedroh//Projetos//cin//OSean.EX//src//main//java//org//serialization//ObjectSerializerGradle.java"));
 
     CompilationUnit compilationUnit = getCompilationUnit(javaCode);
 
+    final String targetMethodName = "createBuildFileSupporters";
+
     compilationUnit.accept(new ASTVisitor() {
       public boolean visit(MethodDeclaration node) {
+        if (!node.getName().toString().equals(targetMethodName)) {
+          return true;
+        }
+
         Block block = node.getBody();
         block.accept(new ASTVisitor() {
           public boolean visit(MethodInvocation node) {
