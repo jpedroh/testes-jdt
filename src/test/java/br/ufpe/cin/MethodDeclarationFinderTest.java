@@ -10,25 +10,25 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.junit.Assert;
 import org.junit.Test;
 
+import br.ufpe.cin.MethodDeclarationFinder.MethodNotFoundException;
+
 public class MethodDeclarationFinderTest {
   @Test
   public void findsExistingMethod() {
     CompilationUnit cu = compileTestingCode();
 
     MethodDeclarationFinder methodDeclarationFinder = new MethodDeclarationFinder();
-    Optional<MethodDeclaration> methodDeclaration = methodDeclarationFinder.getMethodBlockFromTree(cu, "main");
+    MethodDeclaration methodDeclaration = methodDeclarationFinder.getMethodBlockFromTree(cu, "main");
 
-    Assert.assertNotNull(methodDeclaration.get());
+    Assert.assertNotNull(methodDeclaration);
   }
 
-  @Test
+  @Test(expected = MethodNotFoundException.class)
   public void doNotFindNonExistingMethod() {
     CompilationUnit cu = compileTestingCode();
 
     MethodDeclarationFinder methodDeclarationFinder = new MethodDeclarationFinder();
-    Optional<MethodDeclaration> methodDeclaration = methodDeclarationFinder.getMethodBlockFromTree(cu, "nonExisting");
-
-    Assert.assertTrue(methodDeclaration.isEmpty());
+    methodDeclarationFinder.getMethodBlockFromTree(cu, "nonExisting");
   }
 
   private CompilationUnit compileTestingCode() {

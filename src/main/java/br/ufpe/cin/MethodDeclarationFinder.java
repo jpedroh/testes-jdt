@@ -2,7 +2,6 @@ package br.ufpe.cin;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -23,15 +22,32 @@ public class MethodDeclarationFinder {
     }
   }
 
+  public static class MethodNotFoundException extends IllegalArgumentException {
+    private final String targetMethodName;
+
+    public MethodNotFoundException(String targetMethodName) {
+      super("Invalid method provided. Could not find method " + targetMethodName + " in source code.");
+      this.targetMethodName = targetMethodName;
+    }
+
+    public String getTargetMethodName() {
+      return targetMethodName;
+    }
+  }
+
   private final MethodVisitor visitor;
 
   public MethodDeclarationFinder() {
     this.visitor = new MethodVisitor();
   }
 
-  public Optional<MethodDeclaration> getMethodBlockFromTree(CompilationUnit cu, String targetMethodName) {
+  public MethodDeclaration getMethodBlockFromTree(CompilationUnit cu, String targetMethodName) {
     cu.accept(visitor);
 
-    return Optional.ofNullable(visitor.getMethods().get(targetMethodName));
+    if (!visitor.getMethods().containsKey(targetMethodName)) {
+      throw new MethodNotFoundException(targetMethodName);
+    }
+
+    return visitor.getMethods().get(targetMethodName);
   }
 }
