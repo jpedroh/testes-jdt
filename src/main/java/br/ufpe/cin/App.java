@@ -1,30 +1,59 @@
 package br.ufpe.cin;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
+import com.github.javaparser.ParserConfiguration;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
+import com.github.javaparser.utils.CodeGenerationUtils;
+import com.github.javaparser.utils.SourceRoot;
 
 import br.ufpe.cin.MethodDependenciesFinder.MethodDependency;
 
 public class App {
-  public static void main(String[] args) throws IOException {
-    CompilationUnit compilationUnit = new ProjectAstGenerator().getProjectAst(
-        new String[] { "//home//jpedroh//Projetos//cin//OSean.EX//target//classes" },
-        new String[] { "//home//jpedroh//Projetos//cin//OSean.EX//src" },
-        "//home//jpedroh//Projetos//cin//OSean.EX//src//main//java//org//serialization//ObjectSerializerGradle.java");
 
-    final String targetMethodName = "createBuildFileSupporters";
+  private static ParserConfiguration createParserConfiguration() throws Exception {
+    TypeSolver typeSolver = new CombinedTypeSolver(
+        new ReflectionTypeSolver(false),
+        new JavaParserTypeSolver(new File("src/main/java")));
 
-    // final MethodDeclaration methodDeclaration = new MethodDeclarationFinder()
-    // .getMethodBlockFromTree(compilationUnit, targetMethodName);
+    return new ParserConfiguration().setSymbolResolver(new JavaSymbolSolver(typeSolver));
+  }
 
-    // final Set<MethodDependency> methodDependencies = new
-    // MethodDependenciesFinder()
-    // .getMethodDependencies(methodDeclaration);
+  public static void main(String[] args) throws IOException, Exception {
+    CompilationUnit compilationUnit = new SourceRoot(Paths.get("src/main/java"),
+        createParserConfiguration())
+        .parse("br.ufpe.cin", "App.java");
 
-    // methodDependencies.forEach((MethodDependency v) ->
-    // System.out.println(v.toString()));
+    final String targetMethodName = "main";
+
+    final MethodDeclaration methodDeclaration = new MethodDeclarationFinder()
+        .getMethodBlockFromTree(compilationUnit, targetMethodName);
+
+    final Set<MethodDependency> methodDependencies = new MethodDependenciesFinder()
+        .getMethodDependencies(methodDeclaration);
+
+    final Set<MethodDependency> methodDependenciesWithinProject = methodDependencies
+        .stream()
+        .filter(methodDependency -> {
+          String derivedFilePath = CodeGenerationUtils.packageToPath(methodDependency.classQualifiedName);
+          return new File("src/main/java/" + derivedFilePath + ".java").exists();
+        })
+        .collect(Collectors.toSet());
+
+    methodDependenciesWithinProject.forEach(v -> {
+      System.out.println(v.classQualifiedName);
+      System.out.println(v.methodName);
+    });
   }
 }

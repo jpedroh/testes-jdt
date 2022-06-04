@@ -1,29 +1,25 @@
 package br.ufpe.cin;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.MethodCallExpr;
 
 public class MethodDependenciesFinder {
   public static class MethodDependency {
-    String fqdn;
-    String methodName;
+    final String classQualifiedName;
+    final String methodName;
 
-    public MethodDependency(String fqdn, String methodName) {
-      this.fqdn = fqdn;
+    public MethodDependency(String classQualifiedName, String methodName) {
+      this.classQualifiedName = classQualifiedName;
       this.methodName = methodName;
     }
 
     @Override
     public String toString() {
-      return this.fqdn + "\t" + this.methodName;
+      return this.classQualifiedName + "\t" + this.methodName;
     }
 
     @Override
@@ -31,43 +27,24 @@ public class MethodDependenciesFinder {
       if (!(obj instanceof MethodDependency)) {
         return false;
       }
-      return fqdn.equals(((MethodDependency) obj).fqdn) && methodName.equals(((MethodDependency) obj).methodName);
+      return classQualifiedName.equals(((MethodDependency) obj).classQualifiedName)
+          && methodName.equals(((MethodDependency) obj).methodName);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(fqdn, methodName);
+      return Objects.hash(classQualifiedName, methodName);
     }
-  }
-
-  private static class MethodDependenciesVisitor extends ASTVisitor {
-    private final Set<MethodDependency> methodCalls = new HashSet<>();
-
-    public boolean visit(MethodInvocation node) {
-      if (node.getExpression() != null) {
-        ITypeBinding binding = node.getExpression().resolveTypeBinding();
-        if (binding != null) {
-          String classQualifiedName = binding.getQualifiedName();
-          String methodName = node.getName().getIdentifier();
-          methodCalls.add(new MethodDependency(classQualifiedName, methodName));
-        }
-      }
-      return true;
-    }
-
-    public Set<MethodDependency> getMethodDependencies() {
-      return this.methodCalls;
-    }
-  }
-
-  private final MethodDependenciesVisitor visitor;
-
-  public MethodDependenciesFinder() {
-    this.visitor = new MethodDependenciesVisitor();
   }
 
   public Set<MethodDependency> getMethodDependencies(MethodDeclaration methodDeclaration) {
-    methodDeclaration.getBody().accept(visitor);
-    return visitor.getMethodDependencies();
+    return methodDeclaration
+        .findAll(MethodCallExpr.class)
+        .stream()
+        .map((call) -> {
+          final String classQualifiedName = call.resolve().getPackageName() + "." + call.resolve().getClassName();
+          return new MethodDependency(classQualifiedName, call.getNameAsString());
+        })
+        .collect(Collectors.toSet());
   }
 }
