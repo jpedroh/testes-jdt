@@ -4,18 +4,15 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
-import com.github.javaparser.utils.CodeGenerationUtils;
 import com.github.javaparser.utils.SourceRoot;
 
 import br.ufpe.cin.MethodDependenciesFinder.MethodDependency;
@@ -43,13 +40,8 @@ public class App {
     final Set<MethodDependency> methodDependencies = new MethodDependenciesFinder()
         .getMethodDependencies(methodDeclaration);
 
-    final Set<MethodDependency> methodDependenciesWithinProject = methodDependencies
-        .stream()
-        .filter(methodDependency -> {
-          String derivedFilePath = CodeGenerationUtils.packageToPath(methodDependency.classQualifiedName);
-          return new File("src/main/java/" + derivedFilePath + ".java").exists();
-        })
-        .collect(Collectors.toSet());
+    final Set<MethodDependency> methodDependenciesWithinProject = new MethodDependenciesWithinProjectFinder("src/main/java")
+        .getMethodDependenciesWithinProject(methodDependencies);
 
     methodDependenciesWithinProject.forEach(v -> {
       System.out.println(v.classQualifiedName);

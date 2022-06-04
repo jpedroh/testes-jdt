@@ -4,5 +4,6 @@ public class App {
     public static void main(String[] args) {
         Calculadora calculadora = new Calculadora();
         int resultado = calculadora.somar(1, 3);
+        System.out.println("Hello, world!");
     }
 }
