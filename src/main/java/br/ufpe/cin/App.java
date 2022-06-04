@@ -17,12 +17,14 @@ public class App {
 
     final String targetMethodName = "createBuildFileSupporters";
 
-    final MethodDeclaration methodDeclaration = new MethodDeclarationFinder()
-        .getMethodBlockFromTree(compilationUnit, targetMethodName);
+    // final MethodDeclaration methodDeclaration = new MethodDeclarationFinder()
+    // .getMethodBlockFromTree(compilationUnit, targetMethodName);
 
-    final Set<MethodDependency> methodDependencies = new MethodDependenciesFinder()
-        .getMethodDependencies(methodDeclaration);
+    // final Set<MethodDependency> methodDependencies = new
+    // MethodDependenciesFinder()
+    // .getMethodDependencies(methodDeclaration);
 
-    methodDependencies.forEach((MethodDependency v) -> System.out.println(v.toString()));
+    // methodDependencies.forEach((MethodDependency v) ->
+    // System.out.println(v.toString()));
   }
 }
