@@ -1,6 +1,7 @@
 package br.ufpe.cin;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -11,6 +12,10 @@ import br.ufpe.cin.MethodDependenciesFinder.MethodDependency;
 
 public class MethodDependenciesWithinProjectFinder {
   private String projectPath;
+
+  public MethodDependenciesWithinProjectFinder(Path projectPath) {
+    this.projectPath = projectPath.toString();
+  }
 
   public MethodDependenciesWithinProjectFinder(String projectPath) {
     this.projectPath = projectPath;
@@ -25,5 +30,4 @@ public class MethodDependenciesWithinProjectFinder {
         })
         .collect(Collectors.toSet());
   }
-
 }

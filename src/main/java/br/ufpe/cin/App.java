@@ -1,28 +1,29 @@
 package br.ufpe.cin;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.Set;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 
+import br.ufpe.cin.CommandLineParametersParser.CommandLineParameters;
 import br.ufpe.cin.MethodDependenciesFinder.MethodDependency;
 
 public class App {
   public static void main(String[] args) throws IOException, Exception {
-    final String targetMethodName = "main";
+    final CommandLineParametersParser parser = new CommandLineParametersParser();
+    final CommandLineParameters params = parser.parse(args);
 
     final CompilationUnit compilationUnit = new AstGenerator()
-        .getAst(Paths.get("src/main/java"), "br.ufpe.cin", "App.java");
+        .getAstForClass(params.getProjectPath(), params.getQualifiedClassName());
 
     final MethodDeclaration methodDeclaration = new MethodDeclarationFinder()
-        .getMethodBlockFromTree(compilationUnit, targetMethodName);
+        .getMethodBlockFromTree(compilationUnit, params.getTargetMethodName());
 
     final Set<MethodDependency> methodDependencies = new MethodDependenciesFinder()
         .getMethodDependencies(methodDeclaration);
 
-    final Set<MethodDependency> methodDependenciesWithinProject = new MethodDependenciesWithinProjectFinder("src/main/java")
+    final Set<MethodDependency> methodDependenciesWithinProject = new MethodDependenciesWithinProjectFinder(params.getProjectPath())
         .getMethodDependenciesWithinProject(methodDependencies);
 
     methodDependenciesWithinProject.forEach(v -> {

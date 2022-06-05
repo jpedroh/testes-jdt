@@ -12,9 +12,10 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeS
 import com.github.javaparser.utils.SourceRoot;
 
 public class AstGenerator {
-  public CompilationUnit getAst(Path projectRoot, String packageName, String fileName) throws Exception {
-    return new SourceRoot(projectRoot, createParserConfiguration(projectRoot))
-        .parse(packageName, fileName);
+  public CompilationUnit getAstForClass(Path projectRoot, String qualifiedClassName) throws Exception {
+    final String packageName = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf("."));
+    final String className = qualifiedClassName.substring(qualifiedClassName.lastIndexOf(".") + 1);
+    return new SourceRoot(projectRoot, createParserConfiguration(projectRoot)).parse(packageName, className + ".java");
   }
 
   private ParserConfiguration createParserConfiguration(Path projectRoot) throws Exception {
