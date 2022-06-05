@@ -11,13 +11,9 @@ import com.github.javaparser.utils.CodeGenerationUtils;
 import br.ufpe.cin.MethodDependenciesFinder.MethodDependency;
 
 public class MethodDependenciesWithinProjectFinder {
-  private String projectPath;
+  private Path projectPath;
 
   public MethodDependenciesWithinProjectFinder(Path projectPath) {
-    this.projectPath = projectPath.toString();
-  }
-
-  public MethodDependenciesWithinProjectFinder(String projectPath) {
     this.projectPath = projectPath;
   }
 
@@ -26,7 +22,7 @@ public class MethodDependenciesWithinProjectFinder {
         .stream()
         .filter(methodDependency -> {
           String derivedFileName = CodeGenerationUtils.packageToPath(methodDependency.classQualifiedName) + ".java";
-          return new File(Paths.get(projectPath, derivedFileName).toString()).exists();
+          return projectPath.resolve(derivedFileName).toFile().exists();
         })
         .collect(Collectors.toSet());
   }

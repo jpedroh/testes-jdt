@@ -1,5 +1,6 @@
 package br.ufpe.cin;
 
+import java.nio.file.Paths;
 import java.util.Set;
 
 import org.junit.Assert;

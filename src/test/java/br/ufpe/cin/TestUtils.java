@@ -1,6 +1,7 @@
 package br.ufpe.cin;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import com.github.javaparser.ParserConfiguration;
@@ -14,19 +15,19 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeS
 import com.github.javaparser.utils.SourceRoot;
 
 public class TestUtils {
-  public static final String TEST_PROJECT_PATH = "src/test/resources/test-resource/src/main/java";
+  public static final Path TEST_PROJECT_PATH = Paths.get("src/test/resources/test-resource/src/main/java");
 
   private static ParserConfiguration createParserConfiguration() throws Exception {
     TypeSolver typeSolver = new CombinedTypeSolver(
         new ReflectionTypeSolver(false),
-        new JavaParserTypeSolver(new File(TEST_PROJECT_PATH)));
+        new JavaParserTypeSolver(TEST_PROJECT_PATH.toFile()));
 
     return new ParserConfiguration().setSymbolResolver(new JavaSymbolSolver(typeSolver));
   }
 
   public static CompilationUnit compileTestingCode() {
     try {
-      return new SourceRoot(Paths.get(TEST_PROJECT_PATH), createParserConfiguration())
+      return new SourceRoot(TEST_PROJECT_PATH, createParserConfiguration())
           .parse("br.ufpe.cin", "App.java");
     } catch (Exception e) {
       e.printStackTrace();
