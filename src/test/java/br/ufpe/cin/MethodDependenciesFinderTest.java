@@ -19,8 +19,6 @@ public class MethodDependenciesFinderTest {
 
     Set<MethodDependency> methodDependencies = new MethodDependenciesFinder().getMethodDependencies(methodDeclaration);
 
-    methodDependencies.forEach(v -> System.out.println(v.toString()));
-
     Assert.assertEquals(2, methodDependencies.size());
     Assert.assertTrue(methodDependencies.containsAll(List.of(projectDependency, javaDependency)));
   }
