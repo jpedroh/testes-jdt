@@ -13,17 +13,17 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 
 public class MethodDependenciesFinder {
   public static class MethodDependency {
-    String fqdn;
-    String methodName;
+    public final String qualifiedName;
+    public final String methodName;
 
     public MethodDependency(String fqdn, String methodName) {
-      this.fqdn = fqdn;
+      this.qualifiedName = fqdn;
       this.methodName = methodName;
     }
 
     @Override
     public String toString() {
-      return this.fqdn + "\t" + this.methodName;
+      return this.qualifiedName + "\t" + this.methodName;
     }
 
     @Override
@@ -31,12 +31,13 @@ public class MethodDependenciesFinder {
       if (!(obj instanceof MethodDependency)) {
         return false;
       }
-      return fqdn.equals(((MethodDependency) obj).fqdn) && methodName.equals(((MethodDependency) obj).methodName);
+      return qualifiedName.equals(((MethodDependency) obj).qualifiedName)
+          && methodName.equals(((MethodDependency) obj).methodName);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(fqdn, methodName);
+      return Objects.hash(qualifiedName, methodName);
     }
   }
 
