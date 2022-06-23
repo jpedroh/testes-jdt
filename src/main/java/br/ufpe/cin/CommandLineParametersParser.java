@@ -10,22 +10,20 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 public class CommandLineParametersParser {
+  @Builder
+  @AllArgsConstructor
   public static class CommandLineParameters {
     public final Path projectPath;
     public final Path classTargetPath;
     public final Path sourcePath;
     public final String targetClassPath;
     public final String targetMethodName;
-
-    public CommandLineParameters(String projectPath, String classTargetPath, String sourcePath, String targetClassPath,
-        String targetMethodName) {
-      this.projectPath = Path.of(projectPath);
-      this.classTargetPath = Path.of(classTargetPath);
-      this.sourcePath = Path.of(sourcePath);
-      this.targetClassPath = targetClassPath;
-      this.targetMethodName = targetMethodName;
-    }
+    public final String leftCommitHash;
+    public final String rightCommitHash;
   }
 
   private final Options options;
@@ -38,6 +36,8 @@ public class CommandLineParametersParser {
   private static final String targetClassPath = "f";
   private static final String targetMethodNameTag = "m";
   private static final String helpTag = "h";
+  private static final String leftCommitHashTag = "l";
+  private static final String rightCommitHashTag = "r";
 
   public CommandLineParametersParser() {
     options = new Options();
@@ -79,6 +79,20 @@ public class CommandLineParametersParser {
         .desc("Target Method Name")
         .required()
         .build();
+    Option leftCommitHashOption = Option.builder()
+        .option(leftCommitHashTag)
+        .longOpt("leftCommitHash")
+        .hasArg()
+        .desc("Left Commit Hash")
+        .required()
+        .build();
+    Option rightCommitHashOption = Option.builder()
+        .option(rightCommitHashTag)
+        .longOpt("rightCommitHash")
+        .hasArg()
+        .desc("Right Commit Hash")
+        .required()
+        .build();
     Option helpOption = Option.builder()
         .option(helpTag)
         .longOpt("help")
@@ -91,6 +105,8 @@ public class CommandLineParametersParser {
         .addOption(sourcePathOption)
         .addOption(targetClassPathOption)
         .addOption(targetMethodNameOption)
+        .addOption(leftCommitHashOption)
+        .addOption(rightCommitHashOption)
         .addOption(helpOption);
   }
 
@@ -103,10 +119,16 @@ public class CommandLineParametersParser {
         return null;
       }
 
-      return new CommandLineParameters(cmd.getOptionValue(projectPathTag), cmd.getOptionValue(classTargetPathTag),
-          cmd.getOptionValue(sourcePathTag),
-          cmd.getOptionValue(targetClassPath),
-          cmd.getOptionValue(targetMethodNameTag));
+      return CommandLineParameters
+          .builder()
+          .projectPath(Path.of(cmd.getOptionValue(projectPathTag)))
+          .classTargetPath(Path.of(cmd.getOptionValue(classTargetPathTag)))
+          .sourcePath(Path.of(cmd.getOptionValue(sourcePathTag)))
+          .targetClassPath(cmd.getOptionValue(targetClassPath))
+          .targetMethodName(cmd.getOptionValue(targetMethodNameTag))
+          .leftCommitHash(cmd.getOptionValue(leftCommitHashTag))
+          .rightCommitHash(cmd.getOptionValue(rightCommitHashTag))
+          .build();
     } catch (ParseException e) {
       formatter.printHelp("OSean.EX", options);
       throw new IllegalArgumentException(e.getMessage());

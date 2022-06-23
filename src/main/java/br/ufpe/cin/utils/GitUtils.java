@@ -19,8 +19,6 @@ public class GitUtils {
   public static boolean wasFileModifiedBetweenCommits(Repository repo, Path filePath, String newHash, String oldHash) {
     try {
       Git git = new Git(repo);
-      String relativeFilePath = getRelativePathOfFileInRepository(repo, filePath);
-
       List<DiffEntry> result = git.diff()
           .setNewTree(prepareTreeParser(repo, newHash))
           .setOldTree(prepareTreeParser(repo, oldHash))
@@ -29,16 +27,12 @@ public class GitUtils {
 
       return result.stream()
           .anyMatch(entry -> {
-            return entry.getNewPath().equals(relativeFilePath) || entry.getOldPath().equals(relativeFilePath);
+            return entry.getNewPath().equals(filePath.toString()) || entry.getOldPath().equals(filePath.toString());
           });
     } catch (Exception e) {
       e.printStackTrace();
     }
     return false;
-  }
-
-  public static String getRelativePathOfFileInRepository(Repository repository, Path absolutePath) {
-    return repository.getDirectory().toPath().resolve("../").relativize(absolutePath).toString();
   }
 
   private static AbstractTreeIterator prepareTreeParser(Repository repository, String objectId) throws IOException {
