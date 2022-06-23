@@ -12,13 +12,15 @@ import org.apache.commons.cli.ParseException;
 
 public class CommandLineParametersParser {
   public static class CommandLineParameters {
+    public final Path projectPath;
     public final Path classTargetPath;
     public final Path sourcePath;
     public final String targetClassPath;
     public final String targetMethodName;
 
-    public CommandLineParameters(String classTargetPath, String sourcePath, String targetClassPath,
+    public CommandLineParameters(String projectPath, String classTargetPath, String sourcePath, String targetClassPath,
         String targetMethodName) {
+      this.projectPath = Path.of(projectPath);
       this.classTargetPath = Path.of(classTargetPath);
       this.sourcePath = Path.of(sourcePath);
       this.targetClassPath = targetClassPath;
@@ -30,6 +32,7 @@ public class CommandLineParametersParser {
   private final CommandLineParser parser;
   private final HelpFormatter formatter;
 
+  private static final String projectPathTag = "p";
   private static final String classTargetPathTag = "c";
   private static final String sourcePathTag = "s";
   private static final String targetClassPath = "f";
@@ -41,6 +44,13 @@ public class CommandLineParametersParser {
     parser = new DefaultParser();
     formatter = new HelpFormatter();
 
+    Option projectPathOption = Option.builder()
+        .option(projectPathTag)
+        .longOpt("projectPath")
+        .hasArg()
+        .desc("Project path")
+        .required()
+        .build();
     Option classTargetPathOption = Option.builder()
         .option(classTargetPathTag)
         .longOpt("classTargetPath")
@@ -76,6 +86,7 @@ public class CommandLineParametersParser {
         .build();
 
     options
+        .addOption(projectPathOption)
         .addOption(classTargetPathOption)
         .addOption(sourcePathOption)
         .addOption(targetClassPathOption)
@@ -92,7 +103,8 @@ public class CommandLineParametersParser {
         return null;
       }
 
-      return new CommandLineParameters(cmd.getOptionValue(classTargetPathTag), cmd.getOptionValue(sourcePathTag),
+      return new CommandLineParameters(cmd.getOptionValue(projectPathTag), cmd.getOptionValue(classTargetPathTag),
+          cmd.getOptionValue(sourcePathTag),
           cmd.getOptionValue(targetClassPath),
           cmd.getOptionValue(targetMethodNameTag));
     } catch (ParseException e) {
