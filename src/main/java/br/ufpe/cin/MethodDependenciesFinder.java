@@ -1,9 +1,6 @@
 package br.ufpe.cin;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -11,34 +8,19 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
 public class MethodDependenciesFinder {
+  @Builder
+  @EqualsAndHashCode
+  @ToString
+  @AllArgsConstructor
   public static class MethodDependency {
     public final String qualifiedName;
     public final String methodName;
-
-    public MethodDependency(String fqdn, String methodName) {
-      this.qualifiedName = fqdn;
-      this.methodName = methodName;
-    }
-
-    @Override
-    public String toString() {
-      return this.qualifiedName + "\t" + this.methodName;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (!(obj instanceof MethodDependency)) {
-        return false;
-      }
-      return qualifiedName.equals(((MethodDependency) obj).qualifiedName)
-          && methodName.equals(((MethodDependency) obj).methodName);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(qualifiedName, methodName);
-    }
   }
 
   private static class MethodDependenciesVisitor extends ASTVisitor {
@@ -50,7 +32,7 @@ public class MethodDependenciesFinder {
         if (binding != null) {
           String classQualifiedName = binding.getQualifiedName();
           String methodName = node.getName().getIdentifier();
-          methodCalls.add(new MethodDependency(classQualifiedName, methodName));
+          methodCalls.add(MethodDependency.builder().qualifiedName(classQualifiedName).methodName(methodName).build());
         }
       }
       return true;

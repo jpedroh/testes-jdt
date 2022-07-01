@@ -1,12 +1,11 @@
 package br.ufpe.cin;
 
-import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import br.ufpe.cin.MethodDependenciesFinder.MethodDependency;
+import br.ufpe.cin.utils.JavaProjectUtils;
 
 public class MethodDependenciesWithinProjectFinder {
   private Path projectPath;

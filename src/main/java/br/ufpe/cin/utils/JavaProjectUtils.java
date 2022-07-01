@@ -1,4 +1,4 @@
-package br.ufpe.cin;
+package br.ufpe.cin.utils;
 
 import java.io.File;
 import java.nio.file.Path;

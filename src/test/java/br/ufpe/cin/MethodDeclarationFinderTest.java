@@ -1,7 +1,5 @@
 package br.ufpe.cin;
 
-import java.util.Optional;
-
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;

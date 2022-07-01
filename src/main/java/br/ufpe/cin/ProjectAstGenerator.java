@@ -1,9 +1,7 @@
 package br.ufpe.cin;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -14,11 +12,8 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 public class ProjectAstGenerator {
-  public CompilationUnit getProjectAst(Path classPathEntries, Path sourcePathEntries, String sourceFilePath)
-      throws IOException {
-    final String javaCode = Files.readString(Paths.get(sourceFilePath));
-
-    IDocument document = new Document(javaCode);
+  public CompilationUnit getProjectAst(Path classPathEntries, Path sourcePathEntries, String sourceCode) {
+    IDocument document = new Document(sourceCode);
 
     ASTParser parser = ASTParser.newParser(AST.JLS8);
     Map<String, String> options = JavaCore.getOptions();
@@ -33,6 +28,8 @@ public class ProjectAstGenerator {
     parser.setResolveBindings(true);
     parser.setBindingsRecovery(true);
 
-    return (CompilationUnit) parser.createAST(null);
+    final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+    List.of(cu.getProblems()).forEach(v -> System.out.println(v));
+    return cu;
   }
 }

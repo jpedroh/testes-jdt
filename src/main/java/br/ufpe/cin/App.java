@@ -1,9 +1,7 @@
 package br.ufpe.cin;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -17,8 +15,13 @@ public class App {
   public static void main(String[] args) throws IOException {
     final CommandLineParameters parameters = new CommandLineParametersParser().parse(args);
 
+    final Repository repository = GitUtils.getRepositoryFromProjectPath(parameters.projectPath);
+
+    final String sourceCodeForAnalysis = GitUtils.fetchFileContentsInCommit(repository, parameters.targetClassPath,
+        parameters.commitHash);
+
     final CompilationUnit compilationUnit = new ProjectAstGenerator()
-        .getProjectAst(parameters.classTargetPath, parameters.sourcePath, parameters.targetClassPath);
+        .getProjectAst(parameters.classTargetPath, parameters.sourcePath, sourceCodeForAnalysis);
 
     final MethodDeclaration methodDeclaration = new MethodDeclarationFinder()
         .getMethodBlockFromTree(compilationUnit, parameters.targetMethodName);
@@ -29,16 +32,6 @@ public class App {
     final Set<MethodDependency> methodDependenciesWithinProject = new MethodDependenciesWithinProjectFinder(parameters.sourcePath)
         .getMethodDependenciesWithinProject(methodDependencies);
 
-    final Repository repository = GitUtils.getRepositoryFromProjectPath(parameters.projectPath);
-
-    final Set<MethodDependency> dependenciesModifiedInCommit = methodDependenciesWithinProject
-            .stream()
-            .filter(dependency -> {
-                final Path filePath = JavaProjectUtils.qualifiedNameToPath(dependency.qualifiedName);
-
-                return GitUtils.wasFileModifiedBetweenCommits(repository, filePath, parameters.leftCommitHash, parameters.rightCommitHash);
-            }).collect(Collectors.toSet());
-
-    dependenciesModifiedInCommit.forEach((MethodDependency v) -> System.out.println(v.toString()));
+    methodDependenciesWithinProject.forEach((MethodDependency v) -> System.out.println(v.toString()));
   }
 }
